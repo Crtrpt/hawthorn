@@ -1,6 +1,6 @@
 /* picoc parser - parses source and executes statements */
 
-#include "picoc.h"
+#include "hawthorn.h"
 #include "interpreter.h"
 
 /* deallocate any memory */

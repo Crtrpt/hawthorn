@@ -1,4 +1,4 @@
-#include "../picoc.h"
+#include "../hawthorn.h"
 #include "../interpreter.h"
 
 

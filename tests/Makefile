@@ -70,9 +70,9 @@ include csmith/Makefile
 	@echo Test: $*...
 	@if [ "x`echo $* | grep args`" != "x" ]; \
 	then \
-		../picoc $*.c - arg1 arg2 arg3 arg4 2>&1 >$*.output; \
+		../hawthorn $*.c - arg1 arg2 arg3 arg4 2>&1 >$*.output; \
 	else \
-		../picoc $*.c 2>&1 >$*.output; \
+		../hawthorn $*.c 2>&1 >$*.output; \
 	fi
 	@if [ "x`diff -qbu $*.expect $*.output`" != "x" ]; \
 	then \
