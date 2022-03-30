@@ -2,3 +2,5 @@
 dist/*
 *.o
 
+hawthorn
+hawthorn.exe
