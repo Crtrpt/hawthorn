@@ -1,7 +1,8 @@
 c语言脚本解释器 基于picoc 实现
 
 
-[![C/C++ CI](https://github.com/Crtrpt/hawthorn/actions/workflows/c-cpp.yml/badge.svg?branch=master)](https://github.com/Crtrpt/hawthorn/actions/workflows/c-cpp.yml)
+![C/C++ CI](https://github.com/Crtrpt/hawthorn/actions/workflows/c-cpp.yml/badge.svg)
+
 
 =======================================================
 Originally forked from https://github.com/zsaleeba/picoc
