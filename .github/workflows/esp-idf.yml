@@ -2,9 +2,9 @@ name: ESP32 Builder
 
 on:
   push:
-    branches: [ master ]
+    branches: [ esp32 ]
   pull_request:
-    branches: [ master ]
+    branches: [ esp32 ]
 
 jobs:
   builder:
@@ -18,7 +18,7 @@ jobs:
       - name: Install ESP-IDF
         uses: CalinRadoni/esp-idf-v4-action@v2
         with:
-          esp_idf_version: 'v4.4'
+          esp_idf_version: 'latest'
 
       - name: Build
         run: |
