@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -pedantic -g -DUNIX_HOST -DVER=\"2.1\"
+CFLAGS=-Wall -pedantic -g -DUNIX_HOST -DVER=\"0.0.1\"
 LIBS=-lm
 
 TARGET	= hawthorn

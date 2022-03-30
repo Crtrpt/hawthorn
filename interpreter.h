@@ -397,18 +397,10 @@ struct Picoc_Struct
     void *StackFrame;                   /* the current stack frame */
     void *HeapStackTop;                 /* the top of the stack */
 #else
-# ifdef SURVEYOR_HOST
-    unsigned char *HeapMemory;          /* all memory - stack and heap */
-    void *HeapBottom;                   /* the bottom of the (downward-growing) heap */
-    void *StackFrame;                   /* the current stack frame */
-    void *HeapStackTop;                 /* the top of the stack */
-    void *HeapMemStart;
-# else
-    unsigned char HeapMemory[HEAP_SIZE];  /* all memory - stack and heap */
-    void *HeapBottom;                   /* the bottom of the (downward-growing) heap */
-    void *StackFrame;                   /* the current stack frame */
-    void *HeapStackTop;                 /* the top of the stack */
-# endif
+    unsigned char HeapMemory[HEAP_SIZE]; /* all memory - stack and heap */
+    void *HeapBottom;                    /* the bottom of the (downward-growing) heap */
+    void *StackFrame;                    /* the current stack frame */
+    void *HeapStackTop;                  /* the top of the stack */
 #endif
 
     struct AllocNode *FreeListBucket[FREELIST_BUCKETS];      /* we keep a pool of freelist buckets to reduce fragmentation */
@@ -457,11 +449,7 @@ struct Picoc_Struct
     /* exit longjump buffer */
 #if defined(UNIX_HOST) || defined(WIN32)
     jmp_buf PicocExitBuf;
-#endif
-#ifdef SURVEYOR_HOST
-    int PicocExitBuf[41];
-#endif
-    
+#endif    
     /* string table */
     struct Table StringTable;
     struct TableEntry *StringHashTable[STRING_TABLE_SIZE];

@@ -30,17 +30,9 @@ void HeapInit(Picoc *pc, int StackOrHeapSize)
     pc->StackFrame = NULL;                     /* the current stack frame */
     pc->HeapStackTop = NULL;                          /* the top of the stack */
 #else
-# ifdef SURVEYOR_HOST
-    pc->HeapMemory = (unsigned char *)C_HEAPSTART;      /* all memory - stack and heap */
-    pc->HeapBottom = (void *)C_HEAPSTART + HEAP_SIZE;  /* the bottom of the (downward-growing) heap */
-    pc->StackFrame = (void *)C_HEAPSTART;              /* the current stack frame */
-    pc->HeapStackTop = (void *)C_HEAPSTART;                   /* the top of the stack */
-    pc->HeapMemStart = (void *)C_HEAPSTART;
-# else
-    pc->HeapBottom = &HeapMemory[HEAP_SIZE];   /* the bottom of the (downward-growing) heap */
-    pc->StackFrame = &HeapMemory[0];           /* the current stack frame */
-    pc->HeapStackTop = &HeapMemory[0];                /* the top of the stack */
-# endif
+    pc->HeapBottom = &HeapMemory[HEAP_SIZE]; /* the bottom of the (downward-growing) heap */
+    pc->StackFrame = &HeapMemory[0];         /* the current stack frame */
+    pc->HeapStackTop = &HeapMemory[0];       /* the top of the stack */
 #endif
 
     while (((unsigned long)&pc->HeapMemory[AlignOffset] & (sizeof(ALIGN_TYPE)-1)) != 0)
