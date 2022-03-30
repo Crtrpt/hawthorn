@@ -20,42 +20,44 @@ int main(int argc, char **argv)
     int StackSize = getenv("STACKSIZE") ? atoi(getenv("STACKSIZE")) : PICOC_STACK_SIZE;
     Picoc pc;
     
+    PicocInitialise(&pc, StackSize);
+
     if (argc < 2)
     {
         printf("Format: picoc <csource1.c>... [- <arg1>...]    : run a program (calls main() to start it)\n"
                "        picoc -s <csource1.c>... [- <arg1>...] : script mode - runs the program without calling main()\n"
-               "        picoc -i                               : interactive mode\n");
-        exit(1);
-    }
-    
-    PicocInitialise(&pc, StackSize);
-    
-    if (strcmp(argv[ParamCount], "-s") == 0 || strcmp(argv[ParamCount], "-m") == 0)
-    {
-        DontRunMain = TRUE;
-        PicocIncludeAllSystemHeaders(&pc);
-        ParamCount++;
-    }
-        
-    if (argc > ParamCount && strcmp(argv[ParamCount], "-i") == 0)
-    {
+               "        picoc -i                               : interactive mode\n\n"
+               "======================================================================================================\n");
         PicocIncludeAllSystemHeaders(&pc);
         PicocParseInteractive(&pc);
     }
-    else
-    {
-        if (PicocPlatformSetExitPoint(&pc))
+    else {
+        if (strcmp(argv[ParamCount], "-s") == 0 || strcmp(argv[ParamCount], "-m") == 0)
         {
-            PicocCleanup(&pc);
-            return pc.PicocExitValue;
+            DontRunMain = TRUE;
+            PicocIncludeAllSystemHeaders(&pc);
+            ParamCount++;
         }
-        
-        for (; ParamCount < argc && strcmp(argv[ParamCount], "-") != 0; ParamCount++)
-            PicocPlatformScanFile(&pc, argv[ParamCount]);
-        
-        if (!DontRunMain)
-            PicocCallMain(&pc, argc - ParamCount, &argv[ParamCount]);
+        else
+        {
+            if (PicocPlatformSetExitPoint(&pc))
+            {
+                PicocCleanup(&pc);
+                return pc.PicocExitValue;
+            }
+
+            for (; ParamCount < argc && strcmp(argv[ParamCount], "-") != 0; ParamCount++)
+                PicocPlatformScanFile(&pc, argv[ParamCount]);
+
+            if (!DontRunMain)
+                PicocCallMain(&pc, argc - ParamCount, &argv[ParamCount]);
+        }
+
     }
+    
+  
+    
+
     
     PicocCleanup(&pc);
     return pc.PicocExitValue;
