@@ -1,7 +1,7 @@
 c语言脚本解释器 基于picoc 实现
 
 
-![C/C++ CI](https://github.com/Crtrpt/hawthorn/actions/workflows/c-cpp.yml/badge.svg)
+![C](https://github.com/Crtrpt/hawthorn/actions/workflows/c-cpp.yml/badge.svg)
 
 
 =======================================================
