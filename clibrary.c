@@ -1,4 +1,4 @@
-/* picoc mini standard C library - provides an optional tiny C standard library 
+/* Hawthorn mini standard C library - provides an optional tiny C standard library 
  * if BUILTIN_MINI_STDLIB is defined */
 
 #include "hawthorn.h"
@@ -12,23 +12,23 @@ static int LittleEndian;
 
 
 /* global initialisation for libraries */
-void LibraryInit(Picoc *pc)
+void LibraryInit(Hawthorn *hc)
 {
     
     /* define the version number macro */
-    pc->VersionString = TableStrRegister(pc, PICOC_VERSION);
-    VariableDefinePlatformVar(pc, NULL, "PICOC_VERSION", pc->CharPtrType, (union AnyValue *)&pc->VersionString, FALSE);
+    hc->VersionString = TableStrRegister(hc, Hawthorn_VERSION);
+    VariableDefinePlatformVar(hc, NULL, "Hawthorn_VERSION", hc->CharPtrType, (union AnyValue *)&hc->VersionString, FALSE);
 
     /* define endian-ness macros */
     BigEndian = ((*(char*)&__ENDIAN_CHECK__) == 0);
     LittleEndian = ((*(char*)&__ENDIAN_CHECK__) == 1);
 
-    VariableDefinePlatformVar(pc, NULL, "BIG_ENDIAN", &pc->IntType, (union AnyValue *)&BigEndian, FALSE);
-    VariableDefinePlatformVar(pc, NULL, "LITTLE_ENDIAN", &pc->IntType, (union AnyValue *)&LittleEndian, FALSE);
+    VariableDefinePlatformVar(hc, NULL, "BIG_ENDIAN", &hc->IntType, (union AnyValue *)&BigEndian, FALSE);
+    VariableDefinePlatformVar(hc, NULL, "LITTLE_ENDIAN", &hc->IntType, (union AnyValue *)&LittleEndian, FALSE);
 }
 
 /* add a library */
-void LibraryAdd(Picoc *pc, struct Table *GlobalTable, const char *LibraryName, struct LibraryFunction *FuncList)
+void LibraryAdd(Hawthorn *hc, struct Table *GlobalTable, const char *LibraryName, struct LibraryFunction *FuncList)
 {
     struct ParseState Parser;
     int Count;
@@ -36,17 +36,17 @@ void LibraryAdd(Picoc *pc, struct Table *GlobalTable, const char *LibraryName, s
     struct ValueType *ReturnType;
     struct Value *NewValue;
     void *Tokens;
-    char *IntrinsicName = TableStrRegister(pc, "c library");
+    char *IntrinsicName = TableStrRegister(hc, "c library");
     
     /* read all the library definitions */
     for (Count = 0; FuncList[Count].Prototype != NULL; Count++)
     {
-        Tokens = LexAnalyse(pc, IntrinsicName, FuncList[Count].Prototype, strlen((char *)FuncList[Count].Prototype), NULL);
-        LexInitParser(&Parser, pc, FuncList[Count].Prototype, Tokens, IntrinsicName, TRUE, FALSE);
+        Tokens = LexAnalyse(hc, IntrinsicName, FuncList[Count].Prototype, strlen((char *)FuncList[Count].Prototype), NULL);
+        LexInitParser(&Parser, hc, FuncList[Count].Prototype, Tokens, IntrinsicName, TRUE, FALSE);
         TypeParse(&Parser, &ReturnType, &Identifier, NULL);
         NewValue = ParseFunctionDefinition(&Parser, ReturnType, Identifier);
         NewValue->Val->FuncDef.Intrinsic = FuncList[Count].Func;
-        HeapFreeMem(pc, Tokens);
+        HeapFreeMem(hc, Tokens);
     }
 }
 
@@ -92,19 +92,19 @@ void PrintType(struct ValueType *Typ, IOFILE *Stream)
 static int TRUEValue = 1;
 static int ZeroValue = 0;
 
-void BasicIOInit(Picoc *pc)
+void BasicIOInit(Hawthorn *hc)
 {
-    pc->CStdOutBase.Putch = &PlatformPutc;
-    pc->CStdOut = &CStdOutBase;
+    hc->CStdOutBase.Putch = &PlatformPutc;
+    hc->CStdOut = &CStdOutBase;
 }
 
 /* initialise the C library */
-void CLibraryInit(Picoc *pc)
+void CLibraryInit(Hawthorn *hc)
 {
     /* define some constants */
-    VariableDefinePlatformVar(pc, NULL, "NULL", &IntType, (union AnyValue *)&ZeroValue, FALSE);
-    VariableDefinePlatformVar(pc, NULL, "TRUE", &IntType, (union AnyValue *)&TRUEValue, FALSE);
-    VariableDefinePlatformVar(pc, NULL, "FALSE", &IntType, (union AnyValue *)&ZeroValue, FALSE);
+    VariableDefinePlatformVar(hc, NULL, "NULL", &IntType, (union AnyValue *)&ZeroValue, FALSE);
+    VariableDefinePlatformVar(hc, NULL, "TRUE", &IntType, (union AnyValue *)&TRUEValue, FALSE);
+    VariableDefinePlatformVar(hc, NULL, "FALSE", &IntType, (union AnyValue *)&ZeroValue, FALSE);
 }
 
 /* stream for writing into strings */
@@ -128,7 +128,7 @@ void PrintStr(const char *Str, struct OutputStream *Stream)
 }
 
 /* print a single character a given number of times */
-void PrintRepeatedChar(Picoc *pc, char ShowChar, int Length, struct OutputStream *Stream)
+void PrintRepeatedChar(Hawthorn *hc, char ShowChar, int Length, struct OutputStream *Stream)
 {
     while (Length-- > 0)
         PrintCh(ShowChar, Stream);
@@ -369,7 +369,7 @@ void LibExit(struct ParseState *Parser, struct Value *ReturnValue, struct Value 
     PlatformExit(Param[0]->Val->Integer);
 }
 
-#ifdef PICOC_LIBRARY
+#ifdef Hawthorn_LIBRARY
 void LibSin(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
     ReturnValue->Val->FP = sin(Param[0]->Val->FP);
@@ -629,7 +629,7 @@ struct LibraryFunction CLibrary[] =
     { LibGets,          "char *gets(char *);" },
     { LibGetc,          "int getchar();" },
     { LibExit,          "void exit(int);" },
-#ifdef PICOC_LIBRARY
+#ifdef Hawthorn_LIBRARY
     { LibSin,           "float sin(float);" },
     { LibCos,           "float cos(float);" },
     { LibTan,           "float tan(float);" },

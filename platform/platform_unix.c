@@ -4,31 +4,31 @@
 
 
 /* mark where to end the program for platforms which require this */
-jmp_buf PicocExitBuf;
+jmp_buf HawthornExitBuf;
 
 #ifndef NO_DEBUGGER
 #include <signal.h>
 
-Picoc *break_pc = NULL;
+Hawthorn *break_hc = NULL;
 
 static void BreakHandler(int Signal)
 {
-    break_pc->DebugManualBreak = TRUE;
+    break_hc->DebugManualBreak = TRUE;
 }
 
-void PlatformInit(Picoc *pc)
+void PlatformInit(Hawthorn *hc)
 {
     /* capture the break signal and pass it to the debugger */
-    break_pc = pc;
+    break_hc = hc;
     signal(SIGINT, BreakHandler);
 }
 #else
-void PlatformInit(Picoc *pc)
+void PlatformInit(Hawthorn *hc)
 {
 }
 #endif
 
-void PlatformCleanup(Picoc *pc)
+void PlatformCleanup(Hawthorn *hc)
 {
 }
 
@@ -56,7 +56,7 @@ void PlatformPutc(unsigned char OutCh, union OutputStreamInfo *Stream)
 }
 
 /* read a file into memory */
-char *PlatformReadFile(Picoc *pc, const char *FileName)
+char *PlatformReadFile(Hawthorn *hc, const char *FileName)
 {
     struct stat FileInfo;
     char *ReadText;
@@ -65,19 +65,19 @@ char *PlatformReadFile(Picoc *pc, const char *FileName)
     char *p;
     
     if (stat(FileName, &FileInfo))
-        ProgramFailNoParser(pc, "can't read file %s\n", FileName);
+        ProgramFailNoParser(hc, "can't read file %s\n", FileName);
     
     ReadText = malloc(FileInfo.st_size + 1);
     if (ReadText == NULL)
-        ProgramFailNoParser(pc, "out of memory\n");
+        ProgramFailNoParser(hc, "out of memory\n");
         
     InFile = fopen(FileName, "r");
     if (InFile == NULL)
-        ProgramFailNoParser(pc, "can't read file %s\n", FileName);
+        ProgramFailNoParser(hc, "can't read file %s\n", FileName);
     
     BytesRead = fread(ReadText, 1, FileInfo.st_size, InFile);
     if (BytesRead == 0)
-        ProgramFailNoParser(pc, "can't read file %s\n", FileName);
+        ProgramFailNoParser(hc, "can't read file %s\n", FileName);
 
     ReadText[BytesRead] = '\0';
     fclose(InFile);
@@ -94,24 +94,24 @@ char *PlatformReadFile(Picoc *pc, const char *FileName)
 }
 
 /* read and scan a file for definitions */
-void PicocPlatformScanFile(Picoc *pc, const char *FileName)
+void HawthornPlatformScanFile(Hawthorn *hc, const char *FileName)
 {
-    char *SourceStr = PlatformReadFile(pc, FileName);
+    char *SourceStr = PlatformReadFile(hc, FileName);
 
-    /* ignore "#!/path/to/picoc" .. by replacing the "#!" with "//" */
+    /* ignore "#!/path/to/Hawthorn" .. by replacing the "#!" with "//" */
     if (SourceStr != NULL && SourceStr[0] == '#' && SourceStr[1] == '!') 
     { 
         SourceStr[0] = '/'; 
         SourceStr[1] = '/'; 
     }
 
-    PicocParse(pc, FileName, SourceStr, strlen(SourceStr), TRUE, FALSE, TRUE, TRUE);
+    HawthornParse(hc, FileName, SourceStr, strlen(SourceStr), TRUE, FALSE, TRUE, TRUE);
 }
 
 /* exit the program */
-void PlatformExit(Picoc *pc, int RetVal)
+void PlatformExit(Hawthorn *hc, int RetVal)
 {
-    pc->PicocExitValue = RetVal;
-    longjmp(pc->PicocExitBuf, 1);
+    hc->HawthornExitValue = RetVal;
+    longjmp(hc->HawthornExitBuf, 1);
 }
 

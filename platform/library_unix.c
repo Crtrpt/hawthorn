@@ -23,7 +23,7 @@ struct LibraryFunction UnixFunctions[] =
     { NULL,         NULL }
 };
 
-void PlatformLibraryInit(Picoc *pc)
+void PlatformLibraryInit(Hawthorn *hc)
 {
-    IncludeRegister(pc, "picoc_unix.h", &UnixSetupFunc, &UnixFunctions[0], NULL);
+    IncludeRegister(hc, "Hawthorn_unix.h", &UnixSetupFunc, &UnixFunctions[0], NULL);
 }

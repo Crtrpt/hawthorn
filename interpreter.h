@@ -1,6 +1,6 @@
-/* picoc main header file - this has all the main data structures and 
- * function prototypes. If you're just calling picoc you should look at the
- * external interface instead, in picoc.h */
+/* Hawthorn main header file - this has all the main data structures and 
+ * function prototypes. If you're just calling Hawthorn you should look at the
+ * external interface instead, in Hawthorn.h */
  
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
@@ -27,8 +27,8 @@
 #define GETS_BUF_MAX 256
 
 /* for debugging */
-#define PRINT_SOURCE_POS ({ PrintSourceTextErrorLine(Parser->pc->CStdOut, Parser->FileName, Parser->SourceText, Parser->Line, Parser->CharacterPos); PlatformPrintf(Parser->pc->CStdOut, "\n"); })
-#define PRINT_TYPE(typ) PlatformPrintf(Parser->pc->CStdOut, "%t\n", typ);
+#define PRINT_SOURCE_POS ({ PrintSourceTextErrorLine(Parser->hc->CStdOut, Parser->FileName, Parser->SourceText, Parser->Line, Parser->CharacterPos); PlatformPrintf(Parser->hc->CStdOut, "\n"); })
+#define PRINT_TYPE(typ) PlatformPrintf(Parser->hc->CStdOut, "%t\n", typ);
 
 /* small processors use a simplified FILE * for stdio, otherwise use the system FILE * */
 #ifdef BUILTIN_MINI_STDLIB
@@ -56,9 +56,9 @@ typedef FILE IOFILE;
 
 
 struct Table;
-struct Picoc_Struct;
+struct Hawthorn_Struct;
 
-typedef struct Picoc_Struct Picoc;
+typedef struct Hawthorn_Struct Hawthorn;
 
 /* lexical tokens */
 enum LexToken
@@ -81,7 +81,7 @@ enum LexToken
     /* 0x21 */ TokenIncrement, TokenDecrement, TokenUnaryNot, TokenUnaryExor, TokenSizeof, TokenCast,
     /* 0x27 */ TokenLeftSquareBracket, TokenRightSquareBracket, TokenDot, TokenArrow, 
     /* 0x2b */ TokenOpenBracket, TokenCloseBracket,
-    /* 0x2d */ TokenIdentifier, TokenIntegerConstant, TokenFPConstant, TokenStringConstant, TokenCharacterConstant,
+    /* 0x2d */ TokenIdentifier, TokenIntegerConstant, TokenFhconstant, TokenStringConstant, TokenCharacterConstant,
     /* 0x32 */ TokenSemicolon, TokenEllipsis,
     /* 0x34 */ TokenLeftBrace, TokenRightBrace,
     /* 0x36 */ TokenIntType, TokenCharType, TokenFloatType, TokenDoubleType, TokenVoidType, TokenEnumType,
@@ -115,7 +115,7 @@ enum RunMode
 /* parser state - has all this detail so we can parse nested files */
 struct ParseState
 {
-    Picoc *pc;                  /* the picoc instance this parser is a part of */
+    Hawthorn *hc;                  /* the Hawthorn instance this parser is a part of */
     const unsigned char *Pos;   /* the character position in the source text */
     char *FileName;             /* what file we're executing (registered string) */
     short int Line;             /* line number we're executing */
@@ -348,9 +348,9 @@ struct TokenLine
 struct IncludeLibrary
 {
     char *IncludeName;
-    void (*SetupFunction)(Picoc *pc);
+    void (*SetupFunction)(Hawthorn *hc);
     struct LibraryFunction *FuncList;
-    const char *SetupCSource;
+    const char *SetuhcSource;
     struct IncludeLibrary *NextLib;
 };
 
@@ -359,8 +359,8 @@ struct IncludeLibrary
 #define BREAKPOINT_TABLE_SIZE 21
 
 
-/* the entire state of the picoc system */
-struct Picoc_Struct
+/* the entire state of the Hawthorn system */
+struct Hawthorn_Struct
 {
     /* parser global data */
     struct Table GlobalTable;
@@ -385,7 +385,7 @@ struct Picoc_Struct
     struct StackFrame *TopStackFrame;
 
     /* the value passed to exit() */
-    int PicocExitValue;
+    int HawthornExitValue;
 
     /* a list of libraries we can include */
     struct IncludeLibrary *IncludeLibList;
@@ -443,12 +443,12 @@ struct Picoc_Struct
     IOFILE *CStdOut;
     IOFILE CStdOutBase;
 
-    /* the picoc version string */
+    /* the Hawthorn version string */
     const char *VersionString;
     
     /* exit longjump buffer */
 #if defined(UNIX_HOST) || defined(WIN32)
-    jmp_buf PicocExitBuf;
+    jmp_buf HawthornExitBuf;
 #endif    
     /* string table */
     struct Table StringTable;
@@ -457,37 +457,37 @@ struct Picoc_Struct
 };
 
 /* table.c */
-void TableInit(Picoc *pc);
-char *TableStrRegister(Picoc *pc, const char *Str);
-char *TableStrRegister2(Picoc *pc, const char *Str, int Len);
+void TableInit(Hawthorn *hc);
+char *TableStrRegister(Hawthorn *hc, const char *Str);
+char *TableStrRegister2(Hawthorn *hc, const char *Str, int Len);
 void TableInitTable(struct Table *Tbl, struct TableEntry **HashTable, int Size, int OnHeap);
-int TableSet(Picoc *pc, struct Table *Tbl, char *Key, struct Value *Val, const char *DeclFileName, int DeclLine, int DeclColumn);
+int TableSet(Hawthorn *hc, struct Table *Tbl, char *Key, struct Value *Val, const char *DeclFileName, int DeclLine, int DeclColumn);
 int TableGet(struct Table *Tbl, const char *Key, struct Value **Val, const char **DeclFileName, int *DeclLine, int *DeclColumn);
-struct Value *TableDelete(Picoc *pc, struct Table *Tbl, const char *Key);
-char *TableSetIdentifier(Picoc *pc, struct Table *Tbl, const char *Ident, int IdentLen);
-void TableStrFree(Picoc *pc);
+struct Value *TableDelete(Hawthorn *hc, struct Table *Tbl, const char *Key);
+char *TableSetIdentifier(Hawthorn *hc, struct Table *Tbl, const char *Ident, int IdentLen);
+void TableStrFree(Hawthorn *hc);
 
 /* lex.c */
-void LexInit(Picoc *pc);
-void LexCleanup(Picoc *pc);
-void *LexAnalyse(Picoc *pc, const char *FileName, const char *Source, int SourceLen, int *TokenLen);
-void LexInitParser(struct ParseState *Parser, Picoc *pc, const char *SourceText, void *TokenSource, char *FileName, int RunIt, int SetDebugMode);
+void LexInit(Hawthorn *hc);
+void LexCleanup(Hawthorn *hc);
+void *LexAnalyse(Hawthorn *hc, const char *FileName, const char *Source, int SourceLen, int *TokenLen);
+void LexInitParser(struct ParseState *Parser, Hawthorn *hc, const char *SourceText, void *TokenSource, char *FileName, int RunIt, int SetDebugMode);
 enum LexToken LexGetToken(struct ParseState *Parser, struct Value **Value, int IncPos);
 enum LexToken LexRawPeekToken(struct ParseState *Parser);
 void LexToEndOfLine(struct ParseState *Parser);
 void *LexCopyTokens(struct ParseState *StartParser, struct ParseState *EndParser);
-void LexInteractiveClear(Picoc *pc, struct ParseState *Parser);
-void LexInteractiveCompleted(Picoc *pc, struct ParseState *Parser);
-void LexInteractiveStatementPrompt(Picoc *pc);
+void LexInteractiveClear(Hawthorn *hc, struct ParseState *Parser);
+void LexInteractiveCompleted(Hawthorn *hc, struct ParseState *Parser);
+void LexInteractiveStatementPrompt(Hawthorn *hc);
 
 /* parse.c */
-/* the following are defined in picoc.h:
- * void PicocParse(const char *FileName, const char *Source, int SourceLen, int RunIt, int CleanupNow, int CleanupSource);
- * void PicocParseInteractive(); */
-void PicocParseInteractiveNoStartPrompt(Picoc *pc, int EnableDebugger);
+/* the following are defined in Hawthorn.h:
+ * void HawthornParse(const char *FileName, const char *Source, int SourceLen, int RunIt, int CleanupNow, int CleanupSource);
+ * void HawthornParseInteractive(); */
+void HawthornParseInteractiveNoStartPrompt(Hawthorn *hc, int EnableDebugger);
 enum ParseResult ParseStatement(struct ParseState *Parser, int CheckTrailingSemicolon);
 struct Value *ParseFunctionDefinition(struct ParseState *Parser, struct ValueType *ReturnType, char *Identifier);
-void ParseCleanup(Picoc *pc);
+void ParseCleanup(Hawthorn *hc);
 void ParserCopyPos(struct ParseState *To, struct ParseState *From);
 void ParserCopy(struct ParseState *To, struct ParseState *From);
 
@@ -502,62 +502,62 @@ double ExpressionCoerceFP(struct Value *Val);
 #endif
 
 /* type.c */
-void TypeInit(Picoc *pc);
-void TypeCleanup(Picoc *pc);
+void TypeInit(Hawthorn *hc);
+void TypeCleanup(Hawthorn *hc);
 int TypeSize(struct ValueType *Typ, int ArraySize, int Compact);
 int TypeSizeValue(struct Value *Val, int Compact);
 int TypeStackSizeValue(struct Value *Val);
-int TypeLastAccessibleOffset(Picoc *pc, struct Value *Val);
+int TypeLastAccessibleOffset(Hawthorn *hc, struct Value *Val);
 int TypeParseFront(struct ParseState *Parser, struct ValueType **Typ, int *IsStatic);
 void TypeParseIdentPart(struct ParseState *Parser, struct ValueType *BasicTyp, struct ValueType **Typ, char **Identifier);
 void TypeParse(struct ParseState *Parser, struct ValueType **Typ, char **Identifier, int *IsStatic);
-struct ValueType *TypeGetMatching(Picoc *pc, struct ParseState *Parser, struct ValueType *ParentType, enum BaseType Base, int ArraySize, const char *Identifier, int AllowDuplicates);
-struct ValueType *TypeCreateOpaqueStruct(Picoc *pc, struct ParseState *Parser, const char *StructName, int Size);
+struct ValueType *TypeGetMatching(Hawthorn *hc, struct ParseState *Parser, struct ValueType *ParentType, enum BaseType Base, int ArraySize, const char *Identifier, int AllowDuplicates);
+struct ValueType *TypeCreateOpaqueStruct(Hawthorn *hc, struct ParseState *Parser, const char *StructName, int Size);
 int TypeIsForwardDeclared(struct ParseState *Parser, struct ValueType *Typ);
 
 /* heap.c */
-void HeapInit(Picoc *pc, int StackSize);
-void HeapCleanup(Picoc *pc);
-void *HeapAllocStack(Picoc *pc, int Size);
-int HeapPopStack(Picoc *pc, void *Addr, int Size);
-void HeapUnpopStack(Picoc *pc, int Size);
-void HeapPushStackFrame(Picoc *pc);
-int HeapPopStackFrame(Picoc *pc);
-void *HeapAllocMem(Picoc *pc, int Size);
-void HeapFreeMem(Picoc *pc, void *Mem);
+void HeapInit(Hawthorn *hc, int StackSize);
+void Heahcleanup(Hawthorn *hc);
+void *HeapAllocStack(Hawthorn *hc, int Size);
+int HeapPopStack(Hawthorn *hc, void *Addr, int Size);
+void HeapUnpopStack(Hawthorn *hc, int Size);
+void HeapPushStackFrame(Hawthorn *hc);
+int HeapPopStackFrame(Hawthorn *hc);
+void *HeapAllocMem(Hawthorn *hc, int Size);
+void HeapFreeMem(Hawthorn *hc, void *Mem);
 
 /* variable.c */
-void VariableInit(Picoc *pc);
-void VariableCleanup(Picoc *pc);
-void VariableFree(Picoc *pc, struct Value *Val);
-void VariableTableCleanup(Picoc *pc, struct Table *HashTable);
-void *VariableAlloc(Picoc *pc, struct ParseState *Parser, int Size, int OnHeap);
+void VariableInit(Hawthorn *hc);
+void VariableCleanup(Hawthorn *hc);
+void VariableFree(Hawthorn *hc, struct Value *Val);
+void VariableTableCleanup(Hawthorn *hc, struct Table *HashTable);
+void *VariableAlloc(Hawthorn *hc, struct ParseState *Parser, int Size, int OnHeap);
 void VariableStackPop(struct ParseState *Parser, struct Value *Var);
-struct Value *VariableAllocValueAndData(Picoc *pc, struct ParseState *Parser, int DataSize, int IsLValue, struct Value *LValueFrom, int OnHeap);
-struct Value *VariableAllocValueAndCopy(Picoc *pc, struct ParseState *Parser, struct Value *FromValue, int OnHeap);
-struct Value *VariableAllocValueFromType(Picoc *pc, struct ParseState *Parser, struct ValueType *Typ, int IsLValue, struct Value *LValueFrom, int OnHeap);
+struct Value *VariableAllocValueAndData(Hawthorn *hc, struct ParseState *Parser, int DataSize, int IsLValue, struct Value *LValueFrom, int OnHeap);
+struct Value *VariableAllocValueAndCopy(Hawthorn *hc, struct ParseState *Parser, struct Value *FromValue, int OnHeap);
+struct Value *VariableAllocValueFromType(Hawthorn *hc, struct ParseState *Parser, struct ValueType *Typ, int IsLValue, struct Value *LValueFrom, int OnHeap);
 struct Value *VariableAllocValueFromExistingData(struct ParseState *Parser, struct ValueType *Typ, union AnyValue *FromValue, int IsLValue, struct Value *LValueFrom);
 struct Value *VariableAllocValueShared(struct ParseState *Parser, struct Value *FromValue);
-struct Value *VariableDefine(Picoc *pc, struct ParseState *Parser, char *Ident, struct Value *InitValue, struct ValueType *Typ, int MakeWritable);
+struct Value *VariableDefine(Hawthorn *hc, struct ParseState *Parser, char *Ident, struct Value *InitValue, struct ValueType *Typ, int MakeWritable);
 struct Value *VariableDefineButIgnoreIdentical(struct ParseState *Parser, char *Ident, struct ValueType *Typ, int IsStatic, int *FirstVisit);
-int VariableDefined(Picoc *pc, const char *Ident);
-int VariableDefinedAndOutOfScope(Picoc *pc, const char *Ident);
+int VariableDefined(Hawthorn *hc, const char *Ident);
+int VariableDefinedAndOutOfScope(Hawthorn *hc, const char *Ident);
 void VariableRealloc(struct ParseState *Parser, struct Value *FromValue, int NewSize);
-void VariableGet(Picoc *pc, struct ParseState *Parser, const char *Ident, struct Value **LVal);
-void VariableDefinePlatformVar(Picoc *pc, struct ParseState *Parser, char *Ident, struct ValueType *Typ, union AnyValue *FromValue, int IsWritable);
+void VariableGet(Hawthorn *hc, struct ParseState *Parser, const char *Ident, struct Value **LVal);
+void VariableDefinePlatformVar(Hawthorn *hc, struct ParseState *Parser, char *Ident, struct ValueType *Typ, union AnyValue *FromValue, int IsWritable);
 void VariableStackFrameAdd(struct ParseState *Parser, const char *FuncName, int NumParams);
 void VariableStackFramePop(struct ParseState *Parser);
-struct Value *VariableStringLiteralGet(Picoc *pc, char *Ident);
-void VariableStringLiteralDefine(Picoc *pc, char *Ident, struct Value *Val);
+struct Value *VariableStringLiteralGet(Hawthorn *hc, char *Ident);
+void VariableStringLiteralDefine(Hawthorn *hc, char *Ident, struct Value *Val);
 void *VariableDereferencePointer(struct ParseState *Parser, struct Value *PointerValue, struct Value **DerefVal, int *DerefOffset, struct ValueType **DerefType, int *DerefIsLValue);
 int VariableScopeBegin(struct ParseState * Parser, int* PrevScopeID);
 void VariableScopeEnd(struct ParseState * Parser, int ScopeID, int PrevScopeID);
 
 /* clibrary.c */
-void BasicIOInit(Picoc *pc);
-void LibraryInit(Picoc *pc);
-void LibraryAdd(Picoc *pc, struct Table *GlobalTable, const char *LibraryName, struct LibraryFunction *FuncList);
-void CLibraryInit(Picoc *pc);
+void BasicIOInit(Hawthorn *hc);
+void LibraryInit(Hawthorn *hc);
+void LibraryAdd(Hawthorn *hc, struct Table *GlobalTable, const char *LibraryName, struct LibraryFunction *FuncList);
+void CLibraryInit(Hawthorn *hc);
 void PrintCh(char OutCh, IOFILE *Stream);
 void PrintSimpleInt(long Num, IOFILE *Stream);
 void PrintInt(long Num, int FieldWidth, int ZeroPad, int LeftJustify, IOFILE *Stream);
@@ -567,35 +567,35 @@ void PrintType(struct ValueType *Typ, IOFILE *Stream);
 void LibPrintf(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs);
 
 /* platform.c */
-/* the following are defined in picoc.h:
- * void PicocCallMain(int argc, char **argv);
- * int PicocPlatformSetExitPoint();
- * void PicocInitialise(int StackSize);
- * void PicocCleanup();
- * void PicocPlatformScanFile(const char *FileName);
- * extern int PicocExitValue; */
+/* the following are defined in Hawthorn.h:
+ * void HawthornCallMain(int argc, char **argv);
+ * int HawthornPlatformSetExitPoint();
+ * void HawthornInitialise(int StackSize);
+ * void HawthornCleanup();
+ * void HawthornPlatformScanFile(const char *FileName);
+ * extern int HawthornExitValue; */
 void ProgramFail(struct ParseState *Parser, const char *Message, ...);
-void ProgramFailNoParser(Picoc *pc, const char *Message, ...);
+void ProgramFailNoParser(Hawthorn *hc, const char *Message, ...);
 void AssignFail(struct ParseState *Parser, const char *Format, struct ValueType *Type1, struct ValueType *Type2, int Num1, int Num2, const char *FuncName, int ParamNo);
-void LexFail(Picoc *pc, struct LexState *Lexer, const char *Message, ...);
-void PlatformInit(Picoc *pc);
-void PlatformCleanup(Picoc *pc);
+void LexFail(Hawthorn *hc, struct LexState *Lexer, const char *Message, ...);
+void PlatformInit(Hawthorn *hc);
+void PlatformCleanup(Hawthorn *hc);
 char *PlatformGetLine(char *Buf, int MaxLen, const char *Prompt);
 int PlatformGetCharacter();
 void PlatformPutc(unsigned char OutCh, union OutputStreamInfo *);
 void PlatformPrintf(IOFILE *Stream, const char *Format, ...);
 void PlatformVPrintf(IOFILE *Stream, const char *Format, va_list Args);
-void PlatformExit(Picoc *pc, int ExitVal);
-char *PlatformMakeTempName(Picoc *pc, char *TempNameBuffer);
-void PlatformLibraryInit(Picoc *pc);
+void PlatformExit(Hawthorn *hc, int ExitVal);
+char *PlatformMakeTempName(Hawthorn *hc, char *TempNameBuffer);
+void PlatformLibraryInit(Hawthorn *hc);
 
 /* include.c */
-void IncludeInit(Picoc *pc);
-void IncludeCleanup(Picoc *pc);
-void IncludeRegister(Picoc *pc, const char *IncludeName, void (*SetupFunction)(Picoc *pc), struct LibraryFunction *FuncList, const char *SetupCSource);
-void IncludeFile(Picoc *pc, char *Filename);
-/* the following is defined in picoc.h:
- * void PicocIncludeAllSystemHeaders(); */
+void IncludeInit(Hawthorn *hc);
+void IncludeCleanup(Hawthorn *hc);
+void IncludeRegister(Hawthorn *hc, const char *IncludeName, void (*SetupFunction)(Hawthorn *hc), struct LibraryFunction *FuncList, const char *SetuhcSource);
+void IncludeFile(Hawthorn *hc, char *Filename);
+/* the following is defined in Hawthorn.h:
+ * void HawthornIncludeAllSystemHeaders(); */
  
 /* debug.c */
 void DebugInit();
@@ -606,38 +606,38 @@ void DebugCheckStatement(struct ParseState *Parser);
 /* stdio.c */
 extern const char StdioDefs[];
 extern struct LibraryFunction StdioFunctions[];
-void StdioSetupFunc(Picoc *pc);
+void StdioSetupFunc(Hawthorn *hc);
 
 /* math.c */
 extern struct LibraryFunction MathFunctions[];
-void MathSetupFunc(Picoc *pc);
+void MathSetupFunc(Hawthorn *hc);
 
 /* string.c */
 extern struct LibraryFunction StringFunctions[];
-void StringSetupFunc(Picoc *pc);
+void StringSetupFunc(Hawthorn *hc);
 
 /* stdlib.c */
 extern struct LibraryFunction StdlibFunctions[];
-void StdlibSetupFunc(Picoc *pc);
+void StdlibSetupFunc(Hawthorn *hc);
 
 /* time.c */
 extern const char StdTimeDefs[];
 extern struct LibraryFunction StdTimeFunctions[];
-void StdTimeSetupFunc(Picoc *pc);
+void StdTimeSetupFunc(Hawthorn *hc);
 
 /* errno.c */
-void StdErrnoSetupFunc(Picoc *pc);
+void StdErrnoSetupFunc(Hawthorn *hc);
 
 /* ctype.c */
 extern struct LibraryFunction StdCtypeFunctions[];
 
 /* stdbool.c */
 extern const char StdboolDefs[];
-void StdboolSetupFunc(Picoc *pc);
+void StdboolSetupFunc(Hawthorn *hc);
 
 /* unistd.c */
 extern const char UnistdDefs[];
 extern struct LibraryFunction UnistdFunctions[];
-void UnistdSetupFunc(Picoc *pc);
+void UnistdSetupFunc(Hawthorn *hc);
 
 #endif /* INTERPRETER_H */

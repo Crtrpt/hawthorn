@@ -23,7 +23,7 @@
 #define LOCAL_TABLE_SIZE 11                 /* size of local variable table (can expand) */
 #define STRUCT_TABLE_SIZE 11                /* size of struct/union member table (can expand) */
 
-#define INTERACTIVE_PROMPT_START "starting hawthorn " PICOC_VERSION "\n"
+#define INTERACTIVE_PROMPT_START "starting hawthorn " Hawthorn_VERSION "\n"
 #define INTERACTIVE_PROMPT_STATEMENT "hawthorn> "
 #define INTERACTIVE_PROMPT_LINE "     > "
 
@@ -43,10 +43,10 @@
 # include <setjmp.h>
 # ifndef NO_FP
 #  include <math.h>
-#  define PICOC_MATH_LIBRARY
+#  define Hawthorn_MATH_LIBRARY
 #  define USE_READLINE
 #  undef BIG_ENDIAN
-#  if defined(__powerpc__) || defined(__hppa__) || defined(__sparc__)
+#  if defined(__powerhc__) || defined(__hppa__) || defined(__sparc__)
 #   define BIG_ENDIAN
 #  endif
 # endif

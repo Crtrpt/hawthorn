@@ -76,7 +76,7 @@ void StdlibAbort(struct ParseState *Parser, struct Value *ReturnValue, struct Va
 
 void StdlibExit(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    PlatformExit(Parser->pc, Param[0]->Val->Integer);
+    PlatformExit(Parser->hc, Param[0]->Val->Integer);
 }
 
 void StdlibGetenv(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -164,11 +164,11 @@ struct LibraryFunction StdlibFunctions[] =
 };
 
 /* creates various system-dependent definitions */
-void StdlibSetupFunc(Picoc *pc)
+void StdlibSetupFunc(Hawthorn *hc)
 {
     /* define NULL, TRUE and FALSE */
-    if (!VariableDefined(pc, TableStrRegister(pc, "NULL")))
-        VariableDefinePlatformVar(pc, NULL, "NULL", &pc->IntType, (union AnyValue *)&Stdlib_ZeroValue, FALSE);
+    if (!VariableDefined(hc, TableStrRegister(hc, "NULL")))
+        VariableDefinePlatformVar(hc, NULL, "NULL", &hc->IntType, (union AnyValue *)&Stdlib_ZeroValue, FALSE);
 }
 
 #endif /* !BUILTIN_MINI_STDLIB */

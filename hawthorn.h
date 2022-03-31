@@ -1,13 +1,13 @@
-/* picoc external interface. This should be the only header you need to use if
- * you're using picoc as a library. Internal details are in interpreter.h */
-#ifndef PICOC_H
-#define PICOC_H
+/* Hawthorn external interface. This should be the only header you need to use if
+ * you're using Hawthorn as a library. Internal details are in interpreter.h */
+#ifndef Hawthorn_H
+#define Hawthorn_H
 
-/* picoc version number */
+/* Hawthorn version number */
 #ifdef VER
-#define PICOC_VERSION "v0.0.1 beta r" VER /* VER is the subversion version number, obtained via the Makefile */
+#define Hawthorn_VERSION "v0.0.1 beta r" VER /* VER is the subversion version number, obtained via the Makefile */
 #else
-#define PICOC_VERSION "v0.0.1"
+#define Hawthorn_VERSION "v0.0.1"
 #endif
 
 /* handy definitions */
@@ -23,20 +23,20 @@
 #include <setjmp.h>
 
 /* this has to be a macro, otherwise errors will occur due to the stack being corrupt */
-#define PicocPlatformSetExitPoint(pc) setjmp((pc)->PicocExitBuf)
+#define HawthornPlatformSetExitPoint(hc) setjmp((hc)->HawthornExitBuf)
 #endif
 
 /* parse.c */
-void PicocParse(Picoc *pc, const char *FileName, const char *Source, int SourceLen, int RunIt, int CleanupNow, int CleanupSource, int EnableDebugger);
-void PicocParseInteractive(Picoc *pc);
+void HawthornParse(Hawthorn *hc, const char *FileName, const char *Source, int SourceLen, int RunIt, int CleanupNow, int CleanupSource, int EnableDebugger);
+void HawthornParseInteractive(Hawthorn *hc);
 
 /* platform.c */
-void PicocCallMain(Picoc *pc, int argc, char **argv);
-void PicocInitialise(Picoc *pc, int StackSize);
-void PicocCleanup(Picoc *pc);
-void PicocPlatformScanFile(Picoc *pc, const char *FileName);
+void HawthornCallMain(Hawthorn *hc, int argc, char **argv);
+void HawthornInitialise(Hawthorn *hc, int StackSize);
+void HawthornCleanup(Hawthorn *hc);
+void HawthornPlatformScanFile(Hawthorn *hc, const char *FileName);
 
 /* include.c */
-void PicocIncludeAllSystemHeaders(Picoc *pc);
+void HawthornIncludeAllSystemHeaders(Hawthorn *hc);
 
-#endif /* PICOC_H */
+#endif /* Hawthorn_H */

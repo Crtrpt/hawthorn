@@ -110,18 +110,18 @@ struct LibraryFunction StdTimeFunctions[] =
 
 
 /* creates various system-dependent definitions */
-void StdTimeSetupFunc(Picoc *pc)
+void StdTimeSetupFunc(Hawthorn *hc)
 {
     /* make a "struct tm" which is the same size as a native tm structure */
-    TypeCreateOpaqueStruct(pc, NULL, TableStrRegister(pc, "tm"), sizeof(struct tm));
+    TypeCreateOpaqueStruct(hc, NULL, TableStrRegister(hc, "tm"), sizeof(struct tm));
     
     /* define CLK_PER_SEC etc. */
-    VariableDefinePlatformVar(pc, NULL, "CLOCKS_PER_SEC", &pc->IntType, (union AnyValue *)&CLOCKS_PER_SECValue, FALSE);
+    VariableDefinePlatformVar(hc, NULL, "CLOCKS_PER_SEC", &hc->IntType, (union AnyValue *)&CLOCKS_PER_SECValue, FALSE);
 #ifdef CLK_PER_SEC
-    VariableDefinePlatformVar(pc, NULL, "CLK_PER_SEC", &pc->IntType, (union AnyValue *)&CLK_PER_SECValue, FALSE);
+    VariableDefinePlatformVar(hc, NULL, "CLK_PER_SEC", &hc->IntType, (union AnyValue *)&CLK_PER_SECValue, FALSE);
 #endif
 #ifdef CLK_TCK
-    VariableDefinePlatformVar(pc, NULL, "CLK_TCK", &pc->IntType, (union AnyValue *)&CLK_TCKValue, FALSE);
+    VariableDefinePlatformVar(hc, NULL, "CLK_TCK", &hc->IntType, (union AnyValue *)&CLK_TCKValue, FALSE);
 #endif
 }
 

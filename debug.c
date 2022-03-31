@@ -1,4 +1,4 @@
-/* picoc interactive debugger */
+/* Hawthorn interactive debugger */
 
 #ifndef NO_DEBUGGER
 
@@ -7,25 +7,25 @@
 #define BREAKPOINT_HASH(p) ( ((unsigned long)(p)->FileName) ^ (((p)->Line << 16) | ((p)->CharacterPos << 16)) )
 
 /* initialise the debugger by clearing the breakpoint table */
-void DebugInit(Picoc *pc)
+void DebugInit(Hawthorn *hc)
 {
-    TableInitTable(&pc->BreakpointTable, &pc->BreakpointHashTable[0], BREAKPOINT_TABLE_SIZE, TRUE);
-    pc->BreakpointCount = 0;
+    TableInitTable(&hc->BreakpointTable, &hc->BreakpointHashTable[0], BREAKPOINT_TABLE_SIZE, TRUE);
+    hc->BreakpointCount = 0;
 }
 
 /* free the contents of the breakpoint table */
-void DebugCleanup(Picoc *pc)
+void DebugCleanup(Hawthorn *hc)
 {
     struct TableEntry *Entry;
     struct TableEntry *NextEntry;
     int Count;
     
-    for (Count = 0; Count < pc->BreakpointTable.Size; Count++)
+    for (Count = 0; Count < hc->BreakpointTable.Size; Count++)
     {
-        for (Entry = pc->BreakpointHashTable[Count]; Entry != NULL; Entry = NextEntry)
+        for (Entry = hc->BreakpointHashTable[Count]; Entry != NULL; Entry = NextEntry)
         {
             NextEntry = Entry->Next;
-            HeapFreeMem(pc, Entry);
+            HeapFreeMem(hc, Entry);
         }
     }
 }
@@ -34,10 +34,10 @@ void DebugCleanup(Picoc *pc)
 static struct TableEntry *DebugTableSearchBreakpoint(struct ParseState *Parser, int *AddAt)
 {
     struct TableEntry *Entry;
-    Picoc *pc = Parser->pc;
-    int HashValue = BREAKPOINT_HASH(Parser) % pc->BreakpointTable.Size;
+    Hawthorn *hc = Parser->hc;
+    int HashValue = BREAKPOINT_HASH(Parser) % hc->BreakpointTable.Size;
     
-    for (Entry = pc->BreakpointHashTable[HashValue]; Entry != NULL; Entry = Entry->Next)
+    for (Entry = hc->BreakpointHashTable[HashValue]; Entry != NULL; Entry = Entry->Next)
     {
         if (Entry->p.b.FileName == Parser->FileName && Entry->p.b.Line == Parser->Line && Entry->p.b.CharacterPos == Parser->CharacterPos)
             return Entry;   /* found */
@@ -52,21 +52,21 @@ void DebugSetBreakpoint(struct ParseState *Parser)
 {
     int AddAt;
     struct TableEntry *FoundEntry = DebugTableSearchBreakpoint(Parser, &AddAt);
-    Picoc *pc = Parser->pc;
+    Hawthorn *hc = Parser->hc;
     
     if (FoundEntry == NULL)
     {   
         /* add it to the table */
-        struct TableEntry *NewEntry = HeapAllocMem(pc, sizeof(struct TableEntry));
+        struct TableEntry *NewEntry = HeapAllocMem(hc, sizeof(struct TableEntry));
         if (NewEntry == NULL)
-            ProgramFailNoParser(pc, "out of memory");
+            ProgramFailNoParser(hc, "out of memory");
             
         NewEntry->p.b.FileName = Parser->FileName;
         NewEntry->p.b.Line = Parser->Line;
         NewEntry->p.b.CharacterPos = Parser->CharacterPos;
-        NewEntry->Next = pc->BreakpointHashTable[AddAt];
-        pc->BreakpointHashTable[AddAt] = NewEntry;
-        pc->BreakpointCount++;
+        NewEntry->Next = hc->BreakpointHashTable[AddAt];
+        hc->BreakpointHashTable[AddAt] = NewEntry;
+        hc->BreakpointCount++;
     }
 }
 
@@ -74,17 +74,17 @@ void DebugSetBreakpoint(struct ParseState *Parser)
 int DebugClearBreakpoint(struct ParseState *Parser)
 {
     struct TableEntry **EntryPtr;
-    Picoc *pc = Parser->pc;
-    int HashValue = BREAKPOINT_HASH(Parser) % pc->BreakpointTable.Size;
+    Hawthorn *hc = Parser->hc;
+    int HashValue = BREAKPOINT_HASH(Parser) % hc->BreakpointTable.Size;
     
-    for (EntryPtr = &pc->BreakpointHashTable[HashValue]; *EntryPtr != NULL; EntryPtr = &(*EntryPtr)->Next)
+    for (EntryPtr = &hc->BreakpointHashTable[HashValue]; *EntryPtr != NULL; EntryPtr = &(*EntryPtr)->Next)
     {
         struct TableEntry *DeleteEntry = *EntryPtr;
         if (DeleteEntry->p.b.FileName == Parser->FileName && DeleteEntry->p.b.Line == Parser->Line && DeleteEntry->p.b.CharacterPos == Parser->CharacterPos)
         {
             *EntryPtr = DeleteEntry->Next;
-            HeapFreeMem(pc, DeleteEntry);
-            pc->BreakpointCount--;
+            HeapFreeMem(hc, DeleteEntry);
+            hc->BreakpointCount--;
 
             return TRUE;
         }
@@ -98,25 +98,25 @@ void DebugCheckStatement(struct ParseState *Parser)
 {
     int DoBreak = FALSE;
     int AddAt;
-    Picoc *pc = Parser->pc;
+    Hawthorn *hc = Parser->hc;
     
     /* has the user manually pressed break? */
-    if (pc->DebugManualBreak)
+    if (hc->DebugManualBreak)
     {
-        PlatformPrintf(pc->CStdOut, "break\n");
+        PlatformPrintf(hc->CStdOut, "break\n");
         DoBreak = TRUE;
-        pc->DebugManualBreak = FALSE;
+        hc->DebugManualBreak = FALSE;
     }
     
     /* is this a breakpoint location? */
-    if (Parser->pc->BreakpointCount != 0 && DebugTableSearchBreakpoint(Parser, &AddAt) != NULL)
+    if (Parser->hc->BreakpointCount != 0 && DebugTableSearchBreakpoint(Parser, &AddAt) != NULL)
         DoBreak = TRUE;
     
     /* handle a break */
     if (DoBreak)
     {
-        PlatformPrintf(pc->CStdOut, "Handling a break\n");
-        PicocParseInteractiveNoStartPrompt(pc, FALSE);
+        PlatformPrintf(hc->CStdOut, "Handling a break\n");
+        HawthornParseInteractiveNoStartPrompt(hc, FALSE);
     }
 }
 

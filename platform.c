@@ -1,4 +1,4 @@
-/* picoc's interface to the underlying platform. most platform-specific code
+/* Hawthorn's interface to the underlying platform. most platform-specific code
  * is in platform/platform_XX.c and platform/library_XX.c */
 
 #include "hawthorn.h"
@@ -6,42 +6,42 @@
 
 
 /* initialise everything */
-void PicocInitialise(Picoc *pc, int StackSize)
+void HawthornInitialise(Hawthorn *hc, int StackSize)
 {
-    memset(pc, '\0', sizeof(*pc));
-    PlatformInit(pc);
-    BasicIOInit(pc);
-    HeapInit(pc, StackSize);
-    TableInit(pc);
-    VariableInit(pc);
-    LexInit(pc);
-    TypeInit(pc);
+    memset(hc, '\0', sizeof(*hc));
+    PlatformInit(hc);
+    BasicIOInit(hc);
+    HeapInit(hc, StackSize);
+    TableInit(hc);
+    VariableInit(hc);
+    LexInit(hc);
+    TypeInit(hc);
 #ifndef NO_HASH_INCLUDE
-    IncludeInit(pc);
+    IncludeInit(hc);
 #endif
-    LibraryInit(pc);
+    LibraryInit(hc);
 #ifdef BUILTIN_MINI_STDLIB
-    LibraryAdd(pc, &GlobalTable, "c library", &CLibrary[0]);
-    CLibraryInit(pc);
+    LibraryAdd(hc, &GlobalTable, "c library", &CLibrary[0]);
+    CLibraryInit(hc);
 #endif
-    PlatformLibraryInit(pc);
-    DebugInit(pc);
+    PlatformLibraryInit(hc);
+    DebugInit(hc);
 }
 
 /* free memory */
-void PicocCleanup(Picoc *pc)
+void HawthornCleanup(Hawthorn *hc)
 {
-    DebugCleanup(pc);
+    DebugCleanup(hc);
 #ifndef NO_HASH_INCLUDE
-    IncludeCleanup(pc);
+    IncludeCleanup(hc);
 #endif
-    ParseCleanup(pc);
-    LexCleanup(pc);
-    VariableCleanup(pc);
-    TypeCleanup(pc);
-    TableStrFree(pc);
-    HeapCleanup(pc);
-    PlatformCleanup(pc);
+    ParseCleanup(hc);
+    LexCleanup(hc);
+    VariableCleanup(hc);
+    TypeCleanup(hc);
+    TableStrFree(hc);
+    Heahcleanup(hc);
+    PlatformCleanup(hc);
 }
 
 /* platform-dependent code for running programs */
@@ -52,40 +52,40 @@ void PicocCleanup(Picoc *pc)
 #define CALL_MAIN_NO_ARGS_RETURN_INT "__exit_value = main();"
 #define CALL_MAIN_WITH_ARGS_RETURN_INT "__exit_value = main(__argc,__argv);"
 
-void PicocCallMain(Picoc *pc, int argc, char **argv)
+void HawthornCallMain(Hawthorn *hc, int argc, char **argv)
 {
     /* check if the program wants arguments */
     struct Value *FuncValue = NULL;
 
-    if (!VariableDefined(pc, TableStrRegister(pc, "main")))
-        ProgramFailNoParser(pc, "main() is not defined");
+    if (!VariableDefined(hc, TableStrRegister(hc, "main")))
+        ProgramFailNoParser(hc, "main() is not defined");
         
-    VariableGet(pc, NULL, TableStrRegister(pc, "main"), &FuncValue);
+    VariableGet(hc, NULL, TableStrRegister(hc, "main"), &FuncValue);
     if (FuncValue->Typ->Base != TypeFunction)
-        ProgramFailNoParser(pc, "main is not a function - can't call it");
+        ProgramFailNoParser(hc, "main is not a function - can't call it");
 
     if (FuncValue->Val->FuncDef.NumParams != 0)
     {
         /* define the arguments */
-        VariableDefinePlatformVar(pc, NULL, "__argc", &pc->IntType, (union AnyValue *)&argc, FALSE);
-        VariableDefinePlatformVar(pc, NULL, "__argv", pc->CharPtrPtrType, (union AnyValue *)&argv, FALSE);
+        VariableDefinePlatformVar(hc, NULL, "__argc", &hc->IntType, (union AnyValue *)&argc, FALSE);
+        VariableDefinePlatformVar(hc, NULL, "__argv", hc->CharPtrPtrType, (union AnyValue *)&argv, FALSE);
     }
 
-    if (FuncValue->Val->FuncDef.ReturnType == &pc->VoidType)
+    if (FuncValue->Val->FuncDef.ReturnType == &hc->VoidType)
     {
         if (FuncValue->Val->FuncDef.NumParams == 0)
-            PicocParse(pc, "startup", CALL_MAIN_NO_ARGS_RETURN_VOID, strlen(CALL_MAIN_NO_ARGS_RETURN_VOID), TRUE, TRUE, FALSE, TRUE);
+            HawthornParse(hc, "startup", CALL_MAIN_NO_ARGS_RETURN_VOID, strlen(CALL_MAIN_NO_ARGS_RETURN_VOID), TRUE, TRUE, FALSE, TRUE);
         else
-            PicocParse(pc, "startup", CALL_MAIN_WITH_ARGS_RETURN_VOID, strlen(CALL_MAIN_WITH_ARGS_RETURN_VOID), TRUE, TRUE, FALSE, TRUE);
+            HawthornParse(hc, "startup", CALL_MAIN_WITH_ARGS_RETURN_VOID, strlen(CALL_MAIN_WITH_ARGS_RETURN_VOID), TRUE, TRUE, FALSE, TRUE);
     }
     else
     {
-        VariableDefinePlatformVar(pc, NULL, "__exit_value", &pc->IntType, (union AnyValue *)&pc->PicocExitValue, TRUE);
+        VariableDefinePlatformVar(hc, NULL, "__exit_value", &hc->IntType, (union AnyValue *)&hc->HawthornExitValue, TRUE);
     
         if (FuncValue->Val->FuncDef.NumParams == 0)
-            PicocParse(pc, "startup", CALL_MAIN_NO_ARGS_RETURN_INT, strlen(CALL_MAIN_NO_ARGS_RETURN_INT), TRUE, TRUE, FALSE, TRUE);
+            HawthornParse(hc, "startup", CALL_MAIN_NO_ARGS_RETURN_INT, strlen(CALL_MAIN_NO_ARGS_RETURN_INT), TRUE, TRUE, FALSE, TRUE);
         else
-            PicocParse(pc, "startup", CALL_MAIN_WITH_ARGS_RETURN_INT, strlen(CALL_MAIN_WITH_ARGS_RETURN_INT), TRUE, TRUE, FALSE, TRUE);
+            HawthornParse(hc, "startup", CALL_MAIN_WITH_ARGS_RETURN_INT, strlen(CALL_MAIN_WITH_ARGS_RETURN_INT), TRUE, TRUE, FALSE, TRUE);
     }
 }
 #endif
@@ -135,32 +135,32 @@ void ProgramFail(struct ParseState *Parser, const char *Message, ...)
 {
     va_list Args;
 
-    PrintSourceTextErrorLine(Parser->pc->CStdOut, Parser->FileName, Parser->SourceText, Parser->Line, Parser->CharacterPos);
+    PrintSourceTextErrorLine(Parser->hc->CStdOut, Parser->FileName, Parser->SourceText, Parser->Line, Parser->CharacterPos);
     va_start(Args, Message);
-    PlatformVPrintf(Parser->pc->CStdOut, Message, Args);
+    PlatformVPrintf(Parser->hc->CStdOut, Message, Args);
     va_end(Args);
-    PlatformPrintf(Parser->pc->CStdOut, "\n");
-    PlatformExit(Parser->pc, 1);
+    PlatformPrintf(Parser->hc->CStdOut, "\n");
+    PlatformExit(Parser->hc, 1);
 }
 
 /* exit with a message, when we're not parsing a program */
-void ProgramFailNoParser(Picoc *pc, const char *Message, ...)
+void ProgramFailNoParser(Hawthorn *hc, const char *Message, ...)
 {
     va_list Args;
 
     va_start(Args, Message);
-    PlatformVPrintf(pc->CStdOut, Message, Args);
+    PlatformVPrintf(hc->CStdOut, Message, Args);
     va_end(Args);
-    PlatformPrintf(pc->CStdOut, "\n");
-    PlatformExit(pc, 1);
+    PlatformPrintf(hc->CStdOut, "\n");
+    PlatformExit(hc, 1);
 }
 
 /* like ProgramFail() but gives descriptive error messages for assignment */
 void AssignFail(struct ParseState *Parser, const char *Format, struct ValueType *Type1, struct ValueType *Type2, int Num1, int Num2, const char *FuncName, int ParamNo)
 {
-    IOFILE *Stream = Parser->pc->CStdOut;
+    IOFILE *Stream = Parser->hc->CStdOut;
     
-    PrintSourceTextErrorLine(Parser->pc->CStdOut, Parser->FileName, Parser->SourceText, Parser->Line, Parser->CharacterPos);
+    PrintSourceTextErrorLine(Parser->hc->CStdOut, Parser->FileName, Parser->SourceText, Parser->Line, Parser->CharacterPos);
     PlatformPrintf(Stream, "can't %s ", (FuncName == NULL) ? "assign" : "set");   
         
     if (Type1 != NULL)
@@ -172,20 +172,20 @@ void AssignFail(struct ParseState *Parser, const char *Format, struct ValueType 
         PlatformPrintf(Stream, " in argument %d of call to %s()", ParamNo, FuncName);
     
     PlatformPrintf(Stream, "\n");
-    PlatformExit(Parser->pc, 1);
+    PlatformExit(Parser->hc, 1);
 }
 
 /* exit lexing with a message */
-void LexFail(Picoc *pc, struct LexState *Lexer, const char *Message, ...)
+void LexFail(Hawthorn *hc, struct LexState *Lexer, const char *Message, ...)
 {
     va_list Args;
 
-    PrintSourceTextErrorLine(pc->CStdOut, Lexer->FileName, Lexer->SourceText, Lexer->Line, Lexer->CharacterPos);
+    PrintSourceTextErrorLine(hc->CStdOut, Lexer->FileName, Lexer->SourceText, Lexer->Line, Lexer->CharacterPos);
     va_start(Args, Message);
-    PlatformVPrintf(pc->CStdOut, Message, Args);
+    PlatformVPrintf(hc->CStdOut, Message, Args);
     va_end(Args);
-    PlatformPrintf(pc->CStdOut, "\n");
-    PlatformExit(pc, 1);
+    PlatformPrintf(hc->CStdOut, "\n");
+    PlatformExit(hc, 1);
 }
 
 /* printf for compiler error reporting */
@@ -227,7 +227,7 @@ void PlatformVPrintf(IOFILE *Stream, const char *Format, va_list Args)
 
 /* make a new temporary name. takes a static buffer of char [7] as a parameter. should be initialised to "XX0000"
  * where XX can be any characters */
-char *PlatformMakeTempName(Picoc *pc, char *TempNameBuffer)
+char *PlatformMakeTempName(Hawthorn *hc, char *TempNameBuffer)
 {
     int CPos = 5;
     
@@ -236,7 +236,7 @@ char *PlatformMakeTempName(Picoc *pc, char *TempNameBuffer)
         if (TempNameBuffer[CPos] < '9')
         {
             TempNameBuffer[CPos]++;
-            return TableStrRegister(pc, TempNameBuffer);
+            return TableStrRegister(hc, TempNameBuffer);
         }
         else
         {
@@ -245,5 +245,5 @@ char *PlatformMakeTempName(Picoc *pc, char *TempNameBuffer)
         }
     }
 
-    return TableStrRegister(pc, TempNameBuffer);
+    return TableStrRegister(hc, TempNameBuffer);
 }
