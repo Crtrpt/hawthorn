@@ -4,3 +4,10 @@ dist/*
 
 hawthorn
 hawthorn.exe
+
+
+web
+
+CMakeFiles/*
+CMakeCache.txt
+cmake_install.cmake
