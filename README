@@ -1,12 +1,12 @@
-c语言脚本解释器 基于Hawthorn 实现
+c语言脚本解释器 基于Picoc 实现
 
 =======================================================
-Originally forked from https://github.com/zsaleeba/Hawthorn
+Originally forked from https://github.com/zsaleeba/Picoc
 
-Hawthorn
+Picoc
 -----
 
-Hawthorn is a very small C interpreter for scripting. It was originally written 
+Picoc is a very small C interpreter for scripting. It was originally written 
 as a script language for a UAV's on-board flight system. It's also very 
 suitable for other robotic, embedded and non-embedded applications.
 
@@ -17,21 +17,21 @@ data space. This means it can work well in small embedded devices. It's also
 a fun example of how to create a very small language implementation while 
 still keeping the code readable.
 
-Hawthorn is now feature frozen. Since it's important that it remain small it's 
+Picoc is now feature frozen. Since it's important that it remain small it's 
 intended that no more major features will be added from now on. It's been 
 tested on x86-32, x86-64, powerhc, arm, ultrasparc, HP-PA and blackfin 
 processors and is easy to port to new targets. 
 
 
-Compiling Hawthorn
+Compiling Picoc
 ---------------
 
-Hawthorn can be compiled for a UNIX/Linux/POSIX host by typing "make".
+Picoc can be compiled for a UNIX/Linux/POSIX host by typing "make".
 
 The test suite can be run by typing "make test".
 
 
-Porting Hawthorn
+Porting Picoc
 -------------
 
 platform.h is where you select your platform type and specify the includes 
@@ -49,7 +49,7 @@ printf() which are platform-independent.
 Porting the system will involve setting up suitable includes and defines 
 in platform.h, writing some I/O routines in platform_XXX.c, putting 
 whatever user functions you want in platform_library.c and then changing 
-the main program in Hawthorn.c to whatever you need to do to get programs 
+the main program in Picoc.c to whatever you need to do to get programs 
 into the system.
 
 platform.h is set to UNIX_HOST by default so tests can be easily run on
@@ -60,7 +60,7 @@ your target platform.
 Copyright
 ---------
 
-Hawthorn is published under the "New BSD License".
+Picoc is published under the "New BSD License".
 http://www.opensource.org/licenses/bsd-license.php
 
 
