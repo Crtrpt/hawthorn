@@ -2,9 +2,9 @@ name: C/C++ CI
 
 on:
   push:
-    branches: [ liunx ]
+    branches: [ master ]
   pull_request:
-    branches: [ liunx ]
+    branches: [ master ]
 
 jobs:
   build:
